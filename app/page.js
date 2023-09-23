@@ -1,95 +1,55 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client"
+import axios from '@/utilities/axios'
+import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
+import InfiniteScroll from 'react-infinite-scroll-component'
 
-export default function Home() {
+const page = () => {
+  const [posts, setposts] = useState([])
+  const [hashmore, sethashmore] = useState(true)
+  const GetPosts = async ()=> {
+    try {
+      const { data } = await axios.get(`/posts?_limit=10&_start=${posts.length}`)
+      console.log(data)
+      data.length === 0 && sethashmore(false)
+      setposts([...posts,...data])
+    } 
+    catch (error) {
+      console.log(error)
+    }
+  }
+  useEffect(()=>{
+    GetPosts()
+  },[])
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
+    <div className="container mt-3 p-5">
+      <h1 className='json'>Json Placeholder Posts</h1>
+      <InfiniteScroll
+      dataLength={posts.length}
+      next={GetPosts}
+      hasMore={hashmore}
+      loader={<p style={{ textAlign: "center" }}>Loading...</p>}
+      endMessage={
+        <p style={{ textAlign: "center" }}>
+            <b>you have seen all posts !</b>
         </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    }
+      >
+      {posts.length !== 0  &&
+        posts.map((p)=>(
+          <div 
+            key={p.id} className="fs-5 d-flex justify-content-between alert alert-light "
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+            {p.title} <Link href={`/${p.id}`}>Explore Now</Link>
+            </div>
+        )
+        )
+      }
+      </InfiniteScroll>
+    </div>
   )
 }
+
+export default page
+
+
